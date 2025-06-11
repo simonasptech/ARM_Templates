@@ -170,7 +170,7 @@
       "name": "[variables('publicIpName')]",
       "location": "[variables('location')]",
       "sku": {
-        "name": "Basic"
+        "name": "Standard"
       },
       "properties": {
         "publicIPAllocationMethod": "Static"
