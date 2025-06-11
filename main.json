@@ -62,8 +62,8 @@
         "tenantId": "[subscription().tenantId]",
         "accessPolicies": [
           {
-            "tenantId": "[subscription().tenantId]",
-            "objectId": "[deployer().objectId]",
+            "tenantId": "d77db12d-8f86-438f-9c22-6f56e32d275e",
+            "objectId": "846e63df-6670-4dcd-8a67-32b4a1723a4f",
             "permissions": {
               "secrets": [
                 "get",
