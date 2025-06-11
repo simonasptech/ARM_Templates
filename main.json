@@ -8,20 +8,6 @@
       "templateHash": "4343461190609127866"
     }
   },
-  "parameters": {
-    "vmName": {
-      "type": "string",
-      "defaultValue": "syslogvm"
-    },
-    "adminUsername": {
-      "type": "string",
-      "defaultValue": "azureuser"
-    },
-    "deploymentTimestamp": {
-      "type": "string",
-      "defaultValue": "[utcNow()]"
-    }
-  },
   "variables": {
     "location": "uksouth",
     "uniq": "[uniqueString(resourceGroup().id, parameters('vmName'))]",
