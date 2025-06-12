@@ -149,6 +149,19 @@
             }
           },
           {
+            "name": "Allow-HTTP-LetsEncrypt",
+            "properties": {
+              "priority": 1005,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
             "name": "Deny-All-In",
             "properties": {
               "priority": 4096,
