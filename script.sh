@@ -37,6 +37,9 @@ sudo chmod 755 "/etc/letsencrypt/live/@@DOMAIN@@"
 sudo chmod 755 /etc/letsencrypt/archive  
 sudo chmod 755 "/etc/letsencrypt/archive/@@DOMAIN@@"
 
+curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output NinjaOneAgent-i64.deb
+sudo TOKENID="@@TOKENID@@" dpkg -i NinjaOneAgent-i64.deb
+
 # Reload AppArmor to apply changes
 sudo systemctl reload apparmor
 # Reload rsyslog to apply changes
