@@ -24,6 +24,11 @@ awk '
     { print }
 ' "$CONFIG_FILE" > "$TMP_FILE" && sudo mv "$TMP_FILE" "$CONFIG_FILE"
 
+sudo sed -i "s|/etc/ssl/certs/ca-certificates.crt|/etc/letsencrypt/live/@@DOMAIN@@/fullchain.pem|g" /etc/rsyslog.d/99-tls.conf
+sudo sed -i "s|/etc/rsyslog.d/syslog-cert.pem|/etc/letsencrypt/live/@@DOMAIN@@/cert.pem|g" /etc/rsyslog.d/99-tls.conf
+sudo sed -i "s|/etc/rsyslog.d/syslog-key.pem|/etc/letsencrypt/live/@DOMAIN@@/privkey.pem|g" /etc/rsyslog.d/99-tls.conf
+
+
 # Reload AppArmor to apply changes
 sudo systemctl reload apparmor
 # Reload rsyslog to apply changes
