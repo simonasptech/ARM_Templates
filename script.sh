@@ -31,6 +31,11 @@ sudo sed -i "s|/etc/rsyslog.d/syslog-key.pem|/etc/letsencrypt/live/@@DOMAIN@@/pr
 realfile=$(readlink -f /etc/letsencrypt/live/@@DOMAIN@@/privkey.pem)  
 sudo chown root:syslog "$realfile"  
 sudo chmod 640 "$realfile"
+sudo chmod 755 /etc/letsencrypt  
+sudo chmod 755 /etc/letsencrypt/live  
+sudo chmod 755 "/etc/letsencrypt/live/@@DOMAIN@@"  
+sudo chmod 755 /etc/letsencrypt/archive  
+sudo chmod 755 "/etc/letsencrypt/archive/@@DOMAIN@@"
 
 # Reload AppArmor to apply changes
 sudo systemctl reload apparmor
