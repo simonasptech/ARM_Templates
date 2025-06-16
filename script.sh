@@ -10,3 +10,23 @@ sudo certbot certonly --standalone -d "$DOMAIN" --agree-tos --email "$EMAIL" --n
 # Set up automatic renewal with cron
 CRON_JOB="0 3 * * * /usr/bin/certbot renew --quiet"
 (crontab -l 2>/dev/null | grep -v 'certbot renew'; echo "$CRON_JOB") | crontab -
+
+CONFIG_FILE="/etc/apparmor.d/usr.sbin.rsyslogd"
+TMP_FILE=$(mktemp)
+
+awk '
+    /# rsyslog configuration/ {
+        print
+        print "/etc/letsencrypt/*/*/privkey.pem r,"
+        print "/etc/letsencrypt/*/*/privkey*.pem r,"
+        next
+    }
+    { print }
+' "$CONFIG_FILE" > "$TMP_FILE" && sudo mv "$TMP_FILE" "$CONFIG_FILE"
+
+# Reload AppArmor to apply changes
+sudo systemctl reload apparmor
+# Reload rsyslog to apply changes
+sudo systemctl reload rsyslog
+# Restart rsyslog to ensure it picks up the new configuration
+sudo systemctl restart rsyslog
