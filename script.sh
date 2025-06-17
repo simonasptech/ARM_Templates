@@ -4,6 +4,10 @@
 # Installs certbot for SSL certificate management
 DOMAIN="@@DOMAIN@@"
 EMAIL="Simon@aspirets.com"
+HOSTNAME="@@HOSTNAME@@"
+
+# Change Hostname to Customer Name
+sudo hostnamectl set-hostname "$HOSTNAME"
 
 # Obtain certificate
 sudo certbot certonly --standalone -d "$DOMAIN" --agree-tos --email "$EMAIL" --non-interactive
@@ -54,7 +58,7 @@ sudo chown syslog:syslog /var/log/remote
 sudo chmod 755 /var/log/remote
 
 # Download and install the NinjaOne agent
-curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output NinjaOneAgent-i64.deb
+sudo curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output NinjaOneAgent-i64.deb
 sudo TOKENID="@@TOKENID@@" dpkg -i NinjaOneAgent-i64.deb
 
 
