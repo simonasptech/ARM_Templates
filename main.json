@@ -129,7 +129,20 @@
               "protocol": "Tcp",
               "access": "Allow",
               "direction": "Inbound",
-              "sourceAddressPrefix": "*",
+              "sourceAddressPrefixes": [
+                "159.242.64.49/28",
+                "178.23.130.49/28",
+                "5.22.139.108/32",
+                "148.253.180.17/32",
+                "159.242.64.0/32",
+                "159.242.64.8/29",
+                "178.23.131.34/32",
+                "159.242.73.44/32",
+                "159.242.73.49/32",
+                "159.242.73.105/32",
+                "62.232.66.200/32",
+                "86.12.188.51/32"
+               ],
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
               "destinationPortRange": "22"
