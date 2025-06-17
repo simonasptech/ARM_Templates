@@ -49,6 +49,10 @@ $template RemoteHostLogs,"/var/log/remote/%HOSTNAME%/%PROGRAMNAME%.log"
 *.* -?RemoteHostLogs
 EOL
 
+sudo mkdir -p /var/log/remote
+sudo chown syslog:syslog /var/log/remote
+sudo chmod 755 /var/log/remote
+
 # Download and install the NinjaOne agent
 curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output NinjaOneAgent-i64.deb
 sudo TOKENID="@@TOKENID@@" dpkg -i NinjaOneAgent-i64.deb
