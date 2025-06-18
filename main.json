@@ -309,10 +309,11 @@
               "streams": [
                 "Microsoft-Perf"
               ],
-              "samplingFrequencyInSeconds": 300, // Collect every 5 minutes
+              "samplingFrequencyInSeconds": 60, // Collect every 1 minute
               "counterSpecifiers": [
-                "\\Processor(_Total)\\% Processor Time" // A very light counter
+                "Processor(*)\\% Processor Time" // A very light counter
               ],
+              "scheduledTransferPeriod": "PT1M",
               "name": "heartbeatPerfCounters"
             }
           ]
@@ -321,6 +322,7 @@
           "logAnalytics": [
             {
               "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2025-02-01').customerId]",
               "name": "[variables('lawName')]"
             }
           ]
