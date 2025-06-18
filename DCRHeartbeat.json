@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the Log Analytics workspace to send data to."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The full resource ID of the Log Analytics workspace (e.g., /subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...). Used for DCE."
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Virtual Machine to associate this DCR with."
+      }
+    },
+    "dcrName": {
+      "type": "string",
+      "defaultValue": "heartbeatDCR",
+      "metadata": {
+        "description": "Name of the Data Collection Rule."
+      }
+    },
+    "dcrAssociationName": {
+      "type": "string",
+      "defaultValue": "vmHeartbeatAssociation",
+      "metadata": {
+        "description": "Name of the DCR Association."
+      }
+    }
+  },
+  "variables": {
+    "vmResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[parameters('dcrName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dataSources": {
+          "performanceCounters": [
+            {
+              "streams": [
+                "Microsoft-Perf"
+              ],
+              "samplingFrequencyInSeconds": 300, // Collect every 5 minutes
+              "counterSpecifiers": [
+                "\\Processor(_Total)\\% Processor Time" // A very light counter
+              ],
+              "name": "heartbeatPerfCounters"
+            }
+          ]
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "logAnalyticsWorkspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Microsoft-Perf"
+            ],
+            "destinations": [
+              "logAnalyticsWorkspace"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+      "apiVersion": "2022-06-01",
+      "name": "[parameters('dcrAssociationName')]",
+      "scope": "[variables('vmResourceId')]", // This links the DCR to the VM
+      "properties": {
+        "description": "Association for heartbeat DCR",
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "dcrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+    },
+    "dcrAssociationId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"
+    }
+  }
+}
