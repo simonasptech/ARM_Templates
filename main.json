@@ -320,7 +320,7 @@
         "destinations": {
           "logAnalytics": [
             {
-              "workspaceResourceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2025-02-01').customerId]",
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
               "name": "[variables('lawName')]"
             }
           ]
