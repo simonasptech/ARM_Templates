@@ -1,2 +1,0 @@
-  /etc/letsencrypt/*/*/privkey.pem r,
-  /etc/letsencrypt/*/*/privkey*.pem r,
