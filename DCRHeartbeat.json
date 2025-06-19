@@ -46,10 +46,16 @@
       "metadata": {
         "description": "Name of the DCR Association."
       }
+    },
+    "vmResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "vmResourceGroup is the name of the resource group where the VM is located. This is used to construct the resource ID for the VM."
+      }
     }
   },
   "variables": {
-    "vmResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+    "vmResourceId": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
   },
   "resources": [
     {
@@ -95,7 +101,7 @@
     },
     {
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",
-      "apiVersion": "2022-06-01",
+      "apiVersion": "2023-03-11",
       "name": "[parameters('dcrAssociationName')]",
       "scope": "[variables('vmResourceId')]",
       "properties": {
