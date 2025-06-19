@@ -121,6 +121,10 @@
     "dcrAssociationId": {
       "type": "string",
       "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"
-    }
+    },
+    "resolvedVmResourceId": {
+      "type": "string",
+      "value": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+  }
   }
 }
