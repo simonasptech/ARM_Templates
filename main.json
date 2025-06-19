@@ -369,6 +369,10 @@
     "publicIpAddress": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName')), '2024-07-01').ipAddress]"
+    },
+    "vmResourceId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')))]"
     }
   }
 }
