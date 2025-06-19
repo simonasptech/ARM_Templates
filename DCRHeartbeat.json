@@ -52,10 +52,13 @@
       "metadata": {
         "description": "vmResourceGroup is the name of the resource group where the VM is located. This is used to construct the resource ID for the VM."
       }
+    },
+    "vmResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "vmResourceId is the full resource ID of the Virtual Machine. This is used to associate the DCR with the VM."
+      }
     }
-  },
-  "variables": {
-    "vmResourceId": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
   },
   "resources": [
     {
@@ -103,7 +106,7 @@
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",
       "apiVersion": "2023-03-11",
       "name": "[parameters('dcrAssociationName')]",
-      "scope": "[variables('vmResourceId')]",
+      "scope": "[parameters('vmResourceId')]",
       "properties": {
         "description": "Association for heartbeat DCR",
         "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
