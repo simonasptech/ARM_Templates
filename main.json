@@ -372,7 +372,7 @@
     },
     "vmResourceId": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')))]"
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
     }
   }
 }
