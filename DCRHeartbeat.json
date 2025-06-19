@@ -15,6 +15,12 @@
         "description": "The resource ID of the Log Analytics workspace to send data to."
       }
     },
+    "lawName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Log Analytics workspace. This is used to create the DCR and associate it with the VM."
+      }
+    },
     "workspaceResourceId": {
       "type": "string",
       "metadata": {
@@ -58,9 +64,9 @@
               "streams": [
                 "Microsoft-Perf"
               ],
-              "samplingFrequencyInSeconds": 300, // Collect every 5 minutes
+              "samplingFrequencyInSeconds": 300,
               "counterSpecifiers": [
-                "\\Processor(_Total)\\% Processor Time" // A very light counter
+                "\\Processor(_Total)\\% Processor Time"
               ],
               "name": "heartbeatPerfCounters"
             }
@@ -69,8 +75,9 @@
         "destinations": {
           "logAnalytics": [
             {
-              "workspaceResourceId": "[parameters('workspaceResourceId')]",
-              "name": "logAnalyticsWorkspace"
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName'))]",
+              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName')), '2025-02-01').customerId]",
+              "name": "[parameters('lawName')]"
             }
           ]
         },
@@ -80,7 +87,7 @@
               "Microsoft-Perf"
             ],
             "destinations": [
-              "logAnalyticsWorkspace"
+              "[parameters('lawName')]"
             ]
           }
         ]
@@ -90,7 +97,7 @@
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",
       "apiVersion": "2022-06-01",
       "name": "[parameters('dcrAssociationName')]",
-      "scope": "[variables('vmResourceId')]", // This links the DCR to the VM
+      "scope": "[variables('vmResourceId')]",
       "properties": {
         "description": "Association for heartbeat DCR",
         "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
