@@ -373,6 +373,6 @@
     "vmResourceId": {
       "type": "string",
       "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
-    }
+  }
   }
 }
