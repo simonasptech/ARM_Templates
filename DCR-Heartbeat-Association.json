@@ -2,33 +2,44 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vmResourceId": {
-      "type": "string"
+    "associationName": {
+      "type": "string",
+      "defaultValue": "vmHeartbeatAssociation"
     },
     "dcrResourceId": {
       "type": "string"
     },
-    "associationName": {
+    "vmResourceId": {
       "type": "string",
-      "defaultValue": "vmHeartbeatAssociation"
+      "metadata": {
+        "description": "The full resource ID of the Virtual Machine to associate with the DCR."
+      }
     }
   },
   "resources": [
     {
-      "type": "Microsoft.Insights/dataCollectionRuleAssociations",
-      "apiVersion": "2023-03-11",
-      "name": "[parameters('associationName')]",
-      "scope": "/subscriptions/9d9f3491-56f9-4bb8-b0fd-0716d84bf582/resourceGroups/rg_uks_syslog/providers/Microsoft.Compute/virtualMachines/syslogvm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "associateDCRToVM",
       "properties": {
-        "description": "Cross-RG DCR association",
-        "dataCollectionRuleId": "[parameters('dcrResourceId')]"
-      }
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+              "apiVersion": "2023-03-11",
+              "name": "[parameters('associationName')]",
+              "properties": {
+                "description": "Cross-RG DCR association",
+                "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+              }
+            }
+          ]
+        }
+      },
+      "scope": "[parameters('vmResourceId')]"
     }
-  ],
-  "outputs": {
-    "associationId": {
-      "type": "string",
-      "value": "[format('{0}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{1}', parameters('vmResourceId'), parameters('associationName'))]"
-    }
-  }
+  ]
 }
