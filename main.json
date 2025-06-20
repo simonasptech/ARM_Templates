@@ -311,9 +311,8 @@
               ],
               "samplingFrequencyInSeconds": 60,
               "counterSpecifiers": [
-                "Processor(*)\\% Processor Time"
+                "\\Processor(*)\\% Processor Time"
               ],
-              "scheduledTransferPeriod": "PT1M",
               "name": "heartbeatPerfCounters"
             }
           ]
