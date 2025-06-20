@@ -41,6 +41,12 @@
         "description": "Name of the DCR Association."
       }
     },
+    "vmResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "vmResourceGroup is the name of the resource group where the VM is located. This is used to construct the resource ID for the VM."
+      }
+    },
     "vmResourceId": {
       "type": "string",
       "metadata": {
@@ -72,7 +78,8 @@
         "destinations": {
           "logAnalytics": [
             {
-              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName'))]",
+              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName')), '2025-02-01').customerId]",
               "name": "[parameters('lawName')]"
             }
           ]
@@ -96,21 +103,25 @@
       "scope": "[parameters('vmResourceId')]",
       "properties": {
         "description": "Association for heartbeat DCR",
-        "dataCollectionRuleId": "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
       ]
     }
   ],
   "outputs": {
     "dcrId": {
       "type": "string",
-      "value": "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
     },
     "dcrAssociationId": {
       "type": "string",
-      "value": "[format('{0}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{1}', parameters('vmResourceId'), parameters('dcrAssociationName'))]"
-    }
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"
+    },
+    "resolvedVmResourceId": {
+      "type": "string",
+      "value": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+  }
   }
 }

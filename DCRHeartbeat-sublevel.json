@@ -1,0 +1,143 @@
+{
+  "location": "uksouth",
+  "properties": {
+    "mode": "Incremental",
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "targetRgName": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "vmResourceId": {
+          "type": "string"
+        },
+        "lawName": {
+          "type": "string"
+        },
+        "workspaceResourceId": {
+          "type": "string"
+        }
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Resources/deployments",
+          "apiVersion": "2021-04-01",
+          "name": "nestedRGDeployment",
+          "location": "[parameters('location')]",
+          "scope": "[resourceGroup(parameters('targetRgName'))]",
+          "properties": {
+            "mode": "Incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "location": {
+                  "type": "string"
+                },
+                "vmResourceId": {
+                  "type": "string"
+                },
+                "lawName": {
+                  "type": "string"
+                },
+                "workspaceResourceId": {
+                  "type": "string"
+                }
+              },
+              "resources": [
+                {
+                  "type": "Microsoft.Insights/dataCollectionRules",
+                  "apiVersion": "2022-06-01",
+                  "name": "heartbeatDCR",
+                  "location": "[parameters('location')]",
+                  "properties": {
+                    "dataSources": {
+                      "performanceCounters": [
+                        {
+                          "streams": [
+                            "Microsoft-Perf"
+                          ],
+                          "samplingFrequencyInSeconds": 300,
+                          "counterSpecifiers": [
+                            "\\Processor(_Total)\\% Processor Time"
+                          ],
+                          "name": "heartbeatPerfCounters"
+                        }
+                      ]
+                    },
+                    "destinations": {
+                      "logAnalytics": [
+                        {
+                          "workspaceResourceId": "[parameters('workspaceResourceId')]",
+                          "name": "[parameters('lawName')]"
+                        }
+                      ]
+                    },
+                    "dataFlows": [
+                      {
+                        "streams": [
+                          "Microsoft-Perf"
+                        ],
+                        "destinations": [
+                          "[parameters('lawName')]"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                  "apiVersion": "2023-03-11",
+                  "name": "vmHeartbeatAssociation",
+                  "scope": "[parameters('vmResourceId')]",
+                  "properties": {
+                    "description": "Association for heartbeat DCR",
+                    "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
+                  },
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
+                  ]
+                }
+              ]
+            },
+            "parameters": {
+              "location": {
+                "value": "[parameters('location')]"
+              },
+              "vmResourceId": {
+                "value": "[parameters('vmResourceId')]"
+              },
+              "lawName": {
+                "value": "[parameters('lawName')]"
+              },
+              "workspaceResourceId": {
+                "value": "[parameters('workspaceResourceId')]"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "parameters": {
+      "targetRgName": {
+        "value": "YOUR_DCR_RESOURCE_GROUP"
+      },
+      "location": {
+        "value": "uksouth"
+      },
+      "vmResourceId": {
+        "value": "/subscriptions/.../resourceGroups/VM-RG/providers/Microsoft.Compute/virtualMachines/syslogvm"
+      },
+      "lawName": {
+        "value": "AspireTest-law-prod-uksouth-001"
+      },
+      "workspaceResourceId": {
+        "value": "/subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/AspireTest-law-prod-uksouth-001"
+      }
+    }
+  }
+}
