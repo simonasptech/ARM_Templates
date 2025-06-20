@@ -39,7 +39,7 @@
       "apiVersion": "2021-04-01",
       "name": "nestedRGDeployment",
       "location": "[parameters('location')]",
-      "scope": "[resourceGroup(parameters('targetRgName'))]",
+      "resourceGroup": "[parameters('targetRgName')]",
       "properties": {
         "mode": "Incremental",
         "template": {
