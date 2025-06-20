@@ -38,7 +38,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "nestedRGDeployment",
-      "location": "[parameters('location')]",
       "resourceGroup": "[parameters('targetRgName')]",
       "properties": {
         "mode": "Incremental",
