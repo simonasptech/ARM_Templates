@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
@@ -8,22 +8,16 @@
         "description": "Location for all resources."
       }
     },
-    "workspaceId": {
+    "workspaceResourceId": {
       "type": "string",
       "metadata": {
-        "description": "The resource ID of the Log Analytics workspace to send data to."
+        "description": "The full resource ID of the Log Analytics workspace (e.g., /subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...). Used for DCE."
       }
     },
     "lawName": {
       "type": "string",
       "metadata": {
         "description": "Name of the Log Analytics workspace. This is used to create the DCR and associate it with the VM."
-      }
-    },
-    "workspaceResourceId": {
-      "type": "string",
-      "metadata": {
-        "description": "The full resource ID of the Log Analytics workspace (e.g., /subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...). Used for DCE."
       }
     },
     "vmName": {
@@ -44,12 +38,6 @@
       "defaultValue": "vmHeartbeatAssociation",
       "metadata": {
         "description": "Name of the DCR Association."
-      }
-    },
-    "vmResourceGroup": {
-      "type": "string",
-      "metadata": {
-        "description": "vmResourceGroup is the name of the resource group where the VM is located. This is used to construct the resource ID for the VM."
       }
     },
     "vmResourceId": {
@@ -83,8 +71,7 @@
         "destinations": {
           "logAnalytics": [
             {
-              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName'))]",
-              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName')), '2025-02-01').customerId]",
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
               "name": "[parameters('lawName')]"
             }
           ]
@@ -108,25 +95,21 @@
       "scope": "[parameters('vmResourceId')]",
       "properties": {
         "description": "Association for heartbeat DCR",
-        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+        "dataCollectionRuleId": "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+        "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
       ]
     }
   ],
   "outputs": {
     "dcrId": {
       "type": "string",
-      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      "value": "[subscriptionResourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
     },
     "dcrAssociationId": {
       "type": "string",
-      "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"
-    },
-    "resolvedVmResourceId": {
-      "type": "string",
-      "value": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
-  }
+      "value": "[format('{0}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{1}', parameters('vmResourceId'), parameters('dcrAssociationName'))]"
+    }
   }
 }
