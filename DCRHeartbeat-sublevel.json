@@ -109,7 +109,7 @@
                 "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
+                "heartbeatDCR"
               ]
             }
           ]
