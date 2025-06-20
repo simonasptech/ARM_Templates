@@ -1,7 +1,49 @@
-      "vmResourceGroup":{
-        "value": "{{ $('Set Variables').item.json.resourceGroup }}"
-      },
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
 
-            "workspaceId": {
-        "value": "{{ $json.workspace }}"
+$headers = @{
+    "x-ms-client-session-id"    = "5f151eed9a1f45a98972125c6fa95b5c"
+    "Authorization"             = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkNOdjBPSTNSd3FsSEZFVm5hb01Bc2hDSDJYRSIsImtpZCI6IkNOdjBPSTNSd3FsSEZFVm5hb01Bc2hDSDJYRSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9kNzdkYjEyZC04Zjg2LTQzOGYtOWMyMi02ZjU2ZTMyZDI3NWUvIiwiaWF0IjoxNzUwNDExODg3LCJuYmYiOjE3NTA0MTE4ODcsImV4cCI6MTc1MDQxNzI5MiwiYWNyIjoiMSIsImFjcnMiOlsicDEiXSwiYWlvIjoiQWJRQVMvOFpBQUFBNlRTTUUvRmppSkpyMHhxZGlJTzFZKzZKY2tkTGVHRzk1YzlVWkRhU3ExRDlkVUJFVWNaT3hhK3ZNSm92TTRSRmpmRzZHdVJ1VFJYNDlzSFZKeFd5TENsMHJUY2V3enBHSTF4ZzJHa2UrUFdyT0swNzNoeGNscDdkVkhqbHcwR0dsYS9iV2M2dFc3VzZlbUcycWJrdzVoTXdESm4zYUFaWVNOcFA5d3haUlBmMzY4L25vb2dwa3ZQRVF0dkpvdnVRRU1lajVPZWNZRFdxWDlQaEF4d1dkSlU0NGZNamJQMExHRSs1SGlrM2xGQT0iLCJhbHRzZWNpZCI6IjU6OjEwMDMyMDAzRTk0QTVGNEMiLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiYzQ0YjQwODMtM2JiMC00OWMxLWI0N2QtOTc0ZTUzY2JkZjNjIiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJzaW1vbi5ydXRoZXJmb3JkQGFzcGlyZWNzcC5vbm1pY3Jvc29mdC5jb20iLCJmYW1pbHlfbmFtZSI6IlJ1dGhlcmZvcmQiLCJnaXZlbl9uYW1lIjoiU2ltb24iLCJncm91cHMiOlsiODQ2ZTYzZGYtNjY3MC00ZGNkLThhNjctMzJiNGExNzIzYTRmIl0sImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2M5NmFkOWJhLWYwN2UtNDRiZC1iNmQ5LWRjMjdhZDQ1MTI5Zi8iLCJpZHR5cCI6InVzZXIiLCJpcGFkZHIiOiIxNzguMjMuMTMxLjM0IiwibmFtZSI6IlNpbW9uIFJ1dGhlcmZvcmQiLCJyaCI6IjEuQWE4QUxiRjkxNGFQajBPY0ltOVc0eTBuWGtaSWYza0F1dGRQdWtQYXdmajJNQk92QUJLdkFBLiIsInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiIsInNpZCI6IjAwNWVhMmE5LWRlZWQtZWI2Ni1kNDgwLTI5NThhM2JhZGU1OSIsInN1YiI6InMyNlZLMjdDTFgwSFAtWEJGckNOdzROZWs0dGJjakNTNWpnOEVIZEdHeFkiLCJ0aWQiOiJkNzdkYjEyZC04Zjg2LTQzOGYtOWMyMi02ZjU2ZTMyZDI3NWUiLCJ1bmlxdWVfbmFtZSI6InNpbW9uLnJ1dGhlcmZvcmRAYXNwaXJlY3NwLm9ubWljcm9zb2Z0LmNvbSIsInV0aSI6IkstcEw0amtzSUVtLTJ5UFNwbGNRQUEiLCJ2ZXIiOiIxLjAiLCJ4bXNfZWRvdiI6dHJ1ZSwieG1zX2Z0ZCI6Il9UaC1VblA0dHhDeXR2Xzk1NUhHSjU4LTdRQ1VVYjlROGF0RDlBSFJSbndCYzNkbFpHVnVZeTFrYzIxeiIsInhtc19pZHJlbCI6IjMxIDQiLCJ4bXNfdGNkdCI6MTY5OTI1NTMwN30.g0RAc5i2lXxxBVv3-wdPcuXmOV2uaoV_i9a-hxq_D5orVgnShacw1wx7MmZ8tlwaWhi-nnPbfX4X2WbOfZOGGpMYsGDwvUDYKNMf3WIkQd8d3WEA5lnlAZxLBjrG8xPbjqrX7fyFZE_xZrmrOX4E-Y0oVpK1ovzhclxLk3IklD31_88CcRFd0zRZodABPSA8YxCiikebluwhcHQ81HsO2OJOVLRzS7mDA-H8ii62wt7or82MXmvI9bK2wD0x7uYFk5TMqBDFM7gsapykNMvDiAt0N2R34IEf0dX-3EkUDSSWnRe9I4pxDkJtZLyvEYxryRMKNDqfJOkyI3xOr6vMyA"
+    "Referer"                   = ""
+    "Accept-Language"           = "en"
+    "x-ms-command-name"         = "{ Microsoft_Azure_Monitoring.Batch:0,Unknown:2}"
+    "x-ms-client-request-id"    = "67acf179-0cb3-480a-aa17-81bf33db700f"
+    "Accept"                    = "*/*"
+    "x-ms-effective-locale"     = "en.en-us"
+}
+
+$body = @"
+{
+  "requests": [
+    {
+      "httpMethod": "GET",
+      "name": "b0934a31-7a20-4f0c-9911-401fe8dbe00c",
+      "requestHeaderDetails": {
+        "commandName": "Microsoft_Azure_Monitoring."
       },
+      "url": "/subscriptions/9d9f3491-56f9-4bb8-b0fd-0716d84bf582/resourceGroups/rg_uks_syslog/providers/Microsoft.Compute/virtualMachines/syslogvm?api-version=2021-07-01"
+    },
+    {
+      "content": {
+        "properties": {
+          "dataCollectionRuleId": "/subscriptions/9d9f3491-56f9-4bb8-b0fd-0716d84bf582/resourceGroups/sentinel-siem-prod-uksouth-001/providers/Microsoft.Insights/dataCollectionRules/heartbeatDCR-CreatedSeparately"
+        }
+      },
+      "httpMethod": "PUT",
+      "name": "b0934a31-7a20-4f0c-9911-401fe8dbe00d",
+      "requestHeaderDetails": {
+        "commandName": "Microsoft_Azure_Monitoring."
+      },
+      "url": "https://management.azure.com/subscriptions/9d9f3491-56f9-4bb8-b0fd-0716d84bf582/resourceGroups/rg_uks_syslog/providers/Microsoft.Compute/virtualMachines/syslogvm/providers/microsoft.insights/dataCollectionRuleAssociations/heartbeatDCR-CreatedSeparately-association?api-version=2023-03-11"
+    }
+  ]
+}
+"@
+
+Invoke-WebRequest -UseBasicParsing `
+    -Uri "https://management.azure.com/batch?api-version=2020-06-01" `
+    -Method "POST" `
+    -WebSession $session `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $body

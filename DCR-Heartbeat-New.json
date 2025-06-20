@@ -1,0 +1,143 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "dcrName": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Name of the Data Collection Rule (DCR) to create."  
+      }  
+    },  
+    "dcrLocation": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Azure region in which to create the DCR."  
+      }  
+    },  
+    "dcrTagEnvironment": {  
+      "type": "string",  
+      "defaultValue": "production",  
+      "metadata": {  
+        "description": "Environment tag for the DCR."  
+      }  
+    },  
+    "dcrDataSourceName": {  
+      "type": "string",  
+      "defaultValue": "PerfCountersDataSource",  
+      "metadata": {  
+        "description": "Name of the data source within the DCR."  
+      }  
+    },  
+    "dcrPerfCounterObject": {  
+      "type": "string",  
+      "defaultValue": "Processor",  
+      "metadata": {  
+        "description": "Performance counter object to collect."  
+      }  
+    },  
+    "dcrPerfCounterInstance": {  
+      "type": "string",  
+      "defaultValue": "*",  
+      "metadata": {  
+        "description": "Performance counter instance."  
+      }  
+    },  
+    "dcrPerfCounterName": {  
+      "type": "string",  
+      "defaultValue": "% Processor Time",  
+      "metadata": {  
+        "description": "Performance counter name."  
+      }  
+    },  
+    "dcrDestinationLogAnalyticsWorkspaceId": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Resource ID of the destination Log Analytics Workspace."  
+      }  
+    },  
+    "vmResourceId": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Resource ID of the target VM to associate the DCR with (can be in a different resource group)."  
+      }  
+    },  
+    "dcrAssociationName": {  
+      "type": "string",  
+      "defaultValue": "dcrAssociationToVm",  
+      "metadata": {  
+        "description": "Name of the DCR association resource."  
+      }  
+    }  
+  },  
+  "variables": {  
+    "dcrResourceId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
+  },  
+  "resources": [  
+    {  
+      "type": "Microsoft.Insights/dataCollectionRules",  
+      "apiVersion": "2021-09-01-preview",  
+      "name": "[parameters('dcrName')]",  
+      "location": "[parameters('dcrLocation')]",  
+      "tags": {  
+        "environment": "[parameters('dcrTagEnvironment')]"  
+      },  
+      "properties": {  
+        "dataSources": {  
+          "performanceCounters": [  
+            {  
+              "name": "[parameters('dcrDataSourceName')]",  
+              "streams": [  
+                "Microsoft-Perf"  
+              ],  
+              "samplingFrequencyInSeconds": 60,  
+              "counterSpecifiers": [  
+                "[concat('\\', parameters('dcrPerfCounterObject'), '(', parameters('dcrPerfCounterInstance'), ')\\', parameters('dcrPerfCounterName'))]"  
+              ]  
+            }  
+          ]  
+        },  
+        "destinations": {  
+          "logAnalytics": [  
+            {  
+              "name": "logAnalyticsDestination",  
+              "workspaceResourceId": "[parameters('dcrDestinationLogAnalyticsWorkspaceId')]"  
+            }  
+          ]  
+        },  
+        "dataFlows": [  
+          {  
+            "streams": [  
+              "Microsoft-Perf"  
+            ],  
+            "destinations": [  
+              "logAnalyticsDestination"  
+            ]  
+          }  
+        ]  
+      }  
+    },  
+    {  
+      // Data Collection Rule Association: associates the DCR with the specified VM, even if it is in another resource group.  
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",  
+      "apiVersion": "2021-09-01-preview",  
+      "name": "[concat(parameters('vmResourceId'), '/', parameters('dcrAssociationName'))]",  
+      "scope": "[parameters('vmResourceId')]",  
+      "dependsOn": [  
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
+      ],  
+      "properties": {  
+        "dataCollectionRuleId": "[variables('dcrResourceId')]"  
+      }  
+    }  
+  ],  
+  "outputs": {  
+    "dcrResourceId": {  
+      "type": "string",  
+      "value": "[variables('dcrResourceId')]"  
+    },  
+    "dcrAssociationResourceId": {  
+      "type": "string",  
+      "value": "[extensionResourceId(parameters('vmResourceId'), 'Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"  
+    }  
+  }  
+}  
