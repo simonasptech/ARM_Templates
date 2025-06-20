@@ -25,12 +25,14 @@
         "dataSources": {
           "performanceCounters": [
             {
-              "streams": [ "Microsoft-Perf" ],
-              "samplingFrequencyInSeconds": 300,
+              "streams": [
+                "Microsoft-Perf"
+              ],
+              "samplingFrequencyInSeconds": 60,
               "counterSpecifiers": [
                 "\\Processor(_Total)\\% Processor Time"
               ],
-              "name": "heartbeatPerfCounters"
+              "name": "perfCounterSample"
             }
           ]
         },
@@ -38,14 +40,18 @@
           "logAnalytics": [
             {
               "workspaceResourceId": "[parameters('workspaceResourceId')]",
-              "name": "[parameters('lawName')]"
+              "name": "logAnalyticsDest"
             }
           ]
         },
         "dataFlows": [
           {
-            "streams": [ "Microsoft-Perf" ],
-            "destinations": [ "[parameters('lawName')]" ]
+            "streams": [
+              "Microsoft-Perf"
+            ],
+            "destinations": [
+              "logAnalyticsDest"
+            ]
           }
         ]
       }
