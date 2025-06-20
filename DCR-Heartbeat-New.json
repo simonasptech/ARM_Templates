@@ -120,7 +120,7 @@
       // Data Collection Rule Association: associates the DCR with the specified VM, even if it is in another resource group.  
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",  
       "apiVersion": "2021-09-01-preview",  
-      "name": "[concat(parameters('vmResourceId'), '/', parameters('dcrAssociationName'))]",  
+      "name": "[parameters('dcrAssociationName')]",  
       "scope": "[parameters('vmResourceId')]",  
       "dependsOn": [  
         "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
