@@ -18,7 +18,7 @@
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",
       "apiVersion": "2023-03-11",
       "name": "[parameters('associationName')]",
-      "scope": "[parameters('vmResourceId')]",
+      "scope": "/subscriptions/9d9f3491-56f9-4bb8-b0fd-0716d84bf582/resourceGroups/rg_uks_syslog/providers/Microsoft.Compute/virtualMachines/syslogvm",
       "properties": {
         "description": "Cross-RG DCR association",
         "dataCollectionRuleId": "[parameters('dcrResourceId')]"
