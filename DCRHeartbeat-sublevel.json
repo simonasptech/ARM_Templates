@@ -122,21 +122,14 @@
         }
       ]
     },
-    "parameters": {
-      "targetRgName": {
-        "value": "YOUR_DCR_RESOURCE_GROUP"
+    "outputs": {
+      "dcrId": {
+        "type": "string",
+        "value": "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
       },
-      "location": {
-        "value": "uksouth"
-      },
-      "vmResourceId": {
-        "value": "/subscriptions/.../resourceGroups/VM-RG/providers/Microsoft.Compute/virtualMachines/syslogvm"
-      },
-      "lawName": {
-        "value": "AspireTest-law-prod-uksouth-001"
-      },
-      "workspaceResourceId": {
-        "value": "/subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/AspireTest-law-prod-uksouth-001"
+      "dcrAssociationId": {
+        "type": "string",
+        "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', 'vmHeartbeatAssociation')]"
       }
     }
   }
