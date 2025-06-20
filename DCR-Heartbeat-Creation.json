@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "lawName": {
+      "type": "string"
+    },
+    "workspaceResourceId": {
+      "type": "string"
+    },
+    "dcrName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[parameters('dcrName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dataSources": {
+          "performanceCounters": [
+            {
+              "streams": [ "Microsoft-Perf" ],
+              "samplingFrequencyInSeconds": 300,
+              "counterSpecifiers": [
+                "\\Processor(_Total)\\% Processor Time"
+              ],
+              "name": "heartbeatPerfCounters"
+            }
+          ]
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "[parameters('lawName')]"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [ "Microsoft-Perf" ],
+            "destinations": [ "[parameters('lawName')]" ]
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "dcrResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+    }
+  }
+}
