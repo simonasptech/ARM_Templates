@@ -58,8 +58,8 @@ sudo chown syslog:syslog /var/log/remote
 sudo chmod 755 /var/log/remote
 
 # Download and install the NinjaOne agent
-sudo curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output NinjaOneAgent-i64.deb
-sudo TOKENID="@@TOKENID@@" dpkg -i NinjaOneAgent-i64.deb
+sudo curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output /tmp/NinjaOneAgent-i64.deb
+sudo TOKENID="@@TOKENID@@" dpkg -i /tmp/NinjaOneAgent-i64.deb
 
 
 # Reload AppArmor to apply changes
