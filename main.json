@@ -235,6 +235,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },  
       "properties": {
         "hardwareProfile": {
           "vmSize": "Standard_B1s"
