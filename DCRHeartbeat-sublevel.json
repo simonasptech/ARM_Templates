@@ -122,15 +122,5 @@
         }
       ]
     },
-    "outputs": {
-      "dcrId": {
-        "type": "string",
-        "value": "[resourceId('Microsoft.Insights/dataCollectionRules', 'heartbeatDCR')]"
-      },
-      "dcrAssociationId": {
-        "type": "string",
-        "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', 'vmHeartbeatAssociation')]"
-      }
-    }
   }
 }
