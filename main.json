@@ -339,7 +339,10 @@
             ]
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+      ]
     },
     {
       "type": "Microsoft.Insights/dataCollectionRuleAssociations",
