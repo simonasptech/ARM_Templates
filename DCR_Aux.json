@@ -9,12 +9,6 @@
         "description": "Location for all resources."
       }
     },
-    "workspaceResourceId": {
-      "type": "string",
-      "metadata": {
-        "description": "The full resource ID of the Log Analytics workspace (e.g., /subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...). Used for DCE."
-      }
-    },
     "lawName": {
       "type": "string",
       "metadata": {
@@ -29,14 +23,12 @@
     },
     "dcrName": {
       "type": "string",
-      "defaultValue": "heartbeatDCR",
       "metadata": {
         "description": "Name of the Data Collection Rule."
       }
     },
     "dcrAssociationName": {
       "type": "string",
-      "defaultValue": "vmHeartbeatAssociation",
       "metadata": {
         "description": "Name of the DCR Association."
       }
