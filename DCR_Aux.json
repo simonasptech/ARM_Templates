@@ -90,8 +90,8 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source",
-            "outputStream": "Custom-systemd_CL"// Optionally add transformKql here if you need custom transformation  
+            "transformKql": "source | where FacilityName == 'systemd' | project TimeGenerated, HostName, FacilityName, SeverityLevel, Message",
+            "outputStream": "Custom-systemd_CL"
           }  
         ]  
       }  
