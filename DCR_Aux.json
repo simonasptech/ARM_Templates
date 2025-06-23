@@ -54,7 +54,7 @@
   "resources": [  
     {  
       "type": "Microsoft.Insights/dataCollectionRules",  
-      "apiVersion": "2022-06-01",  
+      "apiVersion": "2023-03-11",  
       "name": "[parameters('dcrName')]",  
       "location": "[parameters('location')]",  
       "properties": {  
@@ -89,8 +89,9 @@
             ],  
             "destinations": [  
               "laDestination"  
-            ]  
-            // Optionally add transformKql here if you need custom transformation  
+            ],  
+            "transformKql": "source",
+            "outputStream": "Custom-systemd_CL"// Optionally add transformKql here if you need custom transformation  
           }  
         ]  
       }  
