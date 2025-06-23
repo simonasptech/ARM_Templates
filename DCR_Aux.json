@@ -1,7 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "location": "[parameters('location')]",
   "parameters": {
     "location": {
       "type": "string",
@@ -67,17 +66,16 @@
           "logAnalytics": [
             {
               "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName'))]",
-              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName')), '2025-02-01').customerId]",
               "name": "[parameters('lawName')]"
             }
           ]
         },
         "dataFlows": [
             {
-                "streams": [ "Custom-systemd_CL" ],
+                "streams": [ "Microsoft-Syslog" ],
                 "destinations": "[parameters('lawName')]",
                 "transformKql": "source",                
-                "outputStream": "Custom-MyAuxLog_CL"
+                "outputStream": "Microsoft-Syslog"
             }
         ]
       }
