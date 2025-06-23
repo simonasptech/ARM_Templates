@@ -57,7 +57,7 @@
           "syslog": [  
         {  
           "name": "syslogSource",  
-          "streams": ["syslog"],  
+          "streams": ["Microsoft-Syslog"],  
           "facilityNames": ["*"],
           "logLevels": ["*"]
         }  
