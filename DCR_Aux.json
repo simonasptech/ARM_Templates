@@ -1,0 +1,121 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "location": "[parameters('location')]",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The full resource ID of the Log Analytics workspace (e.g., /subscriptions/.../resourceGroups/.../providers/Microsoft.OperationalInsights/workspaces/...). Used for DCE."
+      }
+    },
+    "lawName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Log Analytics workspace. This is used to create the DCR and associate it with the VM."
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Virtual Machine to associate this DCR with."
+      }
+    },
+    "dcrName": {
+      "type": "string",
+      "defaultValue": "heartbeatDCR",
+      "metadata": {
+        "description": "Name of the Data Collection Rule."
+      }
+    },
+    "dcrAssociationName": {
+      "type": "string",
+      "defaultValue": "vmHeartbeatAssociation",
+      "metadata": {
+        "description": "Name of the DCR Association."
+      }
+    },
+    "vmResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "vmResourceGroup is the name of the resource group where the VM is located. This is used to construct the resource ID for the VM."
+      }
+    },
+    "vmResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "vmResourceId is the full resource ID of the Virtual Machine. This is used to associate the DCR with the VM."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[parameters('dcrName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dataSources": {
+          "syslog": [  
+        {  
+          "name": "syslogSource",  
+          "streams": ["syslog"],  
+          "facilityNames": ["*"],
+          "logLevels": ["*"]
+        }  
+      ]  
+    },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName'))]",
+              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('lawName')), '2025-02-01').customerId]",
+              "name": "[parameters('lawName')]"
+            }
+          ]
+        },
+        "dataFlows": [
+            {
+                "streams": [ "Custom-systemd_CL" ],
+                "destinations": "[parameters('lawName')]",
+                "transformKql": "source",                
+                "outputStream": "Custom-MyAuxLog_CL"
+            }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+      "apiVersion": "2023-03-11",
+      "name": "[parameters('dcrAssociationName')]",
+      "scope": "[parameters('vmResourceId')]",
+      "properties": {
+        "description": "Association for heartbeat DCR",
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "dcrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"
+    },
+    "dcrAssociationId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"
+    },
+    "resolvedVmResourceId": {
+      "type": "string",
+      "value": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+  }
+  }
+}
