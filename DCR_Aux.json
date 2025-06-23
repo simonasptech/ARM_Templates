@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where Facility == 'auth' | project TimeGenerated, HostName, Facility, SeverityLevel, SyslogMessage",
+            "transformKql": "source | where ProcessName == 'systemd'",
             "outputStream": "Custom-systemd_CL"
           }  
         ]  
