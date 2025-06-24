@@ -1,0 +1,383 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.36.1.42791",
+      "templateHash": "4343461190609127866"
+    }
+  },
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "syslogvm"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser"
+    },
+    "deploymentTimestamp": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
+    }
+  },
+  "variables": {
+    "location": "uksouth",
+    "uniq": "[uniqueString(resourceGroup().id, parameters('vmName'))]",
+    "vnetName": "[format('{0}-vnet', parameters('vmName'))]",
+    "subnetName": "default",
+    "subnetPrefix": "10.10.0.0/24",
+    "nsgName": "[format('{0}-nsg', parameters('vmName'))]",
+    "publicIpName": "[format('{0}-pip', parameters('vmName'))]",
+    "nicName": "[format('{0}-nic', parameters('vmName'))]",
+    "keyVaultName": "[toLower(format('{0}kv{1}', parameters('vmName'), variables('uniq')))]",
+    "adminPassword": "[base64(uniqueString(resourceGroup().id, parameters('vmName'), parameters('deploymentTimestamp'), parameters('adminUsername')))]",
+    "lawName": "[format('logws{0}', variables('uniq'))]",
+    "cloudInit": "  \r\n#cloud-config  \r\npackage_update: true  \r\npackage_upgrade: false  \r\npackages:  \r\n  - rsyslog-gnutls  \r\n  - apt-listchanges\r\n  - net-tools  \r\nwrite_files:\r\n  - path: /etc/rsyslog.d/99-tls.conf\r\n    content: |\r\n      module(load=\"imtcp\"\r\n        StreamDriver.Name=\"gtls\"\r\n        StreamDriver.Mode=\"1\"\r\n        StreamDriver.Authmode=\"x509/certvalid\"\r\n      )\r\n\r\n      global(\r\n        defaultNetstreamDriver=\"gtls\"\r\n        defaultNetstreamDriverCAFile=\"/etc/ssl/certs/ca-certificates.crt\"\r\n        defaultNetstreamDriverCertFile=\"/etc/rsyslog.d/syslog-cert.pem\"\r\n        defaultNetstreamDriverKeyFile=\"/etc/rsyslog.d/syslog-key.pem\"\r\n      )\r\n\r\n      # start up listener at port 6514\r\n      input(type=\"imtcp\" port=\"6514\")\r\n\r\n  - path: /etc/apt/apt.conf.d/20auto-upgrades  \r\n    content: |  \r\n      APT::Periodic::Update-Package-Lists \"1\";  \r\n      APT::Periodic::Unattended-Upgrade \"1\";  \r\nruncmd:  \r\n  - |  \r\n    openssl req -x509 -nodes -days 1095 -newkey rsa:2048 -keyout /etc/rsyslog.d/syslog-key.pem -out /etc/rsyslog.d/syslog-cert.pem -subj \"/CN=$(hostname)\"  \r\n    chmod 600 /etc/rsyslog.d/syslog-key.pem /etc/rsyslog.d/syslog-cert.pem  \r\n    chown syslog:adm /etc/rsyslog.d/syslog-key.pem /etc/rsyslog.d/syslog-cert.pem  \r\n    systemctl restart rsyslog  \r\n    systemctl enable unattended-upgrades \r\n    apt-get install -y certbot  \r\n    apt-get upgrade -y  \r\n",
+    "dcrName": "heartbeatDCR",
+    "dcrAssociationName": "vmHeartbeatAssociation"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2025-02-01",
+      "name": "[variables('lawName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2022-07-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+            "tenantId": "d77db12d-8f86-438f-9c22-6f56e32d275e",
+            "objectId": "846e63df-6670-4dcd-8a67-32b4a1723a4f",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list",
+                "set"
+              ]
+            }
+          }
+        ],
+        "enabledForDeployment": true,
+        "enabledForTemplateDeployment": true
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/vmAdminPass', variables('keyVaultName'))]",
+      "properties": {
+        "value": "[variables('adminPassword')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2022-07-01",
+      "name": "[variables('vnetName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.10.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2022-07-01",
+      "name": "[variables('nsgName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Allow-SSH",
+            "properties": {
+              "priority": 1000,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [  
+                  "159.242.64.48/28",  
+                  "178.23.130.48/28",  
+                  "5.22.139.108/32",  
+                  "148.253.180.17/32",  
+                  "159.242.64.0/32",  
+                  "159.242.64.8/29",  
+                  "178.23.131.34/32",  
+                  "159.242.73.44/32",  
+                  "159.242.73.49/32",  
+                  "159.242.73.105/32",  
+                  "62.232.66.200/32",  
+                  "86.12.188.51/32"  
+              ],
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "Allow-SyslogTLS",
+            "properties": {
+              "priority": 1010,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "6514"
+            }
+          },
+          {
+            "name": "Allow-HTTP-LetsEncrypt",
+            "properties": {
+              "priority": 1005,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "Deny-All-In",
+            "properties": {
+              "priority": 4096,
+              "protocol": "*",
+              "access": "Deny",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('publicIpName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2022-07-01",
+      "name": "[variables('nicName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+              },
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2022-07-01').subnets[0].id]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },  
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_B1s"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[variables('adminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          },
+          "customData": "[base64(variables('cloudInit'))]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "ubuntu-24_04-lts",
+            "sku": "server",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}/{1}', parameters('vmName'), 'AzureMonitorLinuxAgent')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publisher": "Microsoft.Azure.Monitor",
+        "type": "AzureMonitorLinuxAgent",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {},
+        "settings": {
+          "workspaceId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2025-02-01').customerId]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[variables('dcrName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "dataSources": {
+          "performanceCounters": [
+            {
+              "streams": [
+                "Microsoft-Perf"
+              ],
+              "samplingFrequencyInSeconds": 60,
+              "counterSpecifiers": [
+                "\\Processor(*)\\% Processor Time"
+              ],
+              "name": "heartbeatPerfCounters"
+            }
+          ]
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+              "workspaceID": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2025-02-01').customerId]",
+              "name": "[variables('lawName')]"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Microsoft-Perf"
+            ],
+            "destinations": [
+              "[variables('lawName')]"
+            ]
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+      "apiVersion": "2023-03-11",
+      "name": "[variables('dcrAssociationName')]",
+      "scope": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]", 
+      "properties": {
+        "description": "Association for heartbeat DCR",
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('dcrName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "vmLoginUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "vaultUri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2022-07-01').vaultUri]"
+    },
+    "lawId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+    },
+    "publicIpAddress": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName')), '2024-07-01').ipAddress]"
+    },
+    "vmResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+  }
+  }
+}
