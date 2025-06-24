@@ -9,6 +9,8 @@ HOSTNAME="@@HOSTNAME@@"
 # Change Hostname to Customer Name
 sudo hostnamectl set-hostname "$HOSTNAME"
 
+sudo apt install -y network-manager
+
 # Obtain certificate
 sudo certbot certonly --standalone -d "$DOMAIN" --agree-tos --email "$EMAIL" --non-interactive
 
