@@ -51,6 +51,8 @@ sudo chmod 755 "/etc/letsencrypt/archive/@@DOMAIN@@"
 # Add remote syslog configuration directory to conf file
 sudo tee -a "/etc/rsyslog.d/99-tls.conf" >/dev/null << 'EOL'
 
+$MaxMesageSize 64k
+
 $template RemoteHostLogs,"/var/log/remote/%HOSTNAME%/%PROGRAMNAME%.log"
 *.* -?RemoteHostLogs
 EOL
