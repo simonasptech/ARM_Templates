@@ -57,9 +57,28 @@ $template RemoteHostLogs,"/var/log/remote/%HOSTNAME%/%PROGRAMNAME%.log"
 *.* -?RemoteHostLogs
 EOL
 
+# Create the remote log directory structure
+
 sudo mkdir -p /var/log/remote
 sudo chown syslog:syslog /var/log/remote
 sudo chmod 755 /var/log/remote
+
+# Create logrotate configuration for remote logs
+sudo tee -a "/etc/logrotate.d/rsyslog.remote" >/dev/null << 'EOL'
+
+/var/log/remote/*/*.log
+        { 
+        rotate 1
+        hourly
+        missingok
+        notifempty
+        compress
+        sharedscripts
+        postrotate
+                /usr/lib/rsyslog/rsyslog-rotate
+        endscript
+        }
+EOL
 
 # Download and install the NinjaOne agent
 sudo curl https://aspire.rmmservice.eu/ws/api/v2/generic-installer/NinjaOneAgent-i64.deb -L --output /tmp/NinjaOneAgent-i64.deb
