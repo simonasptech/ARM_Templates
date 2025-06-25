@@ -3,7 +3,7 @@
 
 # Installs certbot for SSL certificate management
 DOMAIN="@@DOMAIN@@"
-EMAIL="Simon@aspirets.com"
+EMAIL="Simon@email.com"
 HOSTNAME="@@HOSTNAME@@"
 
 # Change Hostname to Customer Name
