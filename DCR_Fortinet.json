@@ -1,0 +1,127 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "location": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Location for all resources."  
+      }  
+    },  
+    "workspaceName": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Name of the Log Analytics Workspace."  
+      }  
+    },  
+    "workspaceResourceGroup": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Resource group where the Log Analytics Workspace resides."  
+      }  
+    },  
+    "vmName": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Name of the Virtual Machine to associate the DCR with."  
+      }  
+    },  
+    "vmResourceGroup": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Resource group of the Virtual Machine."  
+      }  
+    },  
+    "vmResourceId": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Full resource ID of the Virtual Machine (for associating the DCR)."  
+      }  
+    },  
+    "dcrName": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Name of the Data Collection Rule."  
+      }  
+    },  
+    "dcrAssociationName": {  
+      "type": "string",  
+      "metadata": {  
+        "description": "Name of the DCR Association."  
+      }  
+    }  
+  },  
+  "resources": [  
+    {  
+      "type": "Microsoft.Insights/dataCollectionRules",  
+      "apiVersion": "2023-03-11",  
+      "name": "[parameters('dcrName')]",  
+      "location": "[parameters('location')]",  
+      "properties": {  
+        "dataSources": {  
+          "syslog": [  
+            {  
+              "name": "syslogSource",  
+              "streams": [  
+                "Microsoft-Syslog"  
+              ],  
+              "facilityNames": [  
+                "*"  
+              ],  
+              "logLevels": [  
+                "*"  
+              ]  
+            }  
+          ]  
+        },  
+        "destinations": {  
+          "logAnalytics": [  
+            {  
+              "workspaceResourceId": "[resourceId(parameters('workspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",  
+              "name": "laDestination"  
+            }  
+          ]  
+        },  
+        "dataFlows": [  
+          {  
+            "streams": [  
+              "Microsoft-Syslog"  
+            ],  
+            "destinations": [  
+              "laDestination"  
+            ],  
+            "transformKql": "source | where SyslogMessage has 'logver='",
+            "outputStream": "Custom-Forti_CL"
+          }  
+        ]  
+      }  
+    },  
+    {  
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",  
+      "apiVersion": "2023-03-11",  
+      "name": "[parameters('dcrAssociationName')]",  
+      "scope": "[parameters('vmResourceId')]",  
+      "properties": {  
+        "description": "Association for syslog DCR",  
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
+      },  
+      "dependsOn": [  
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
+      ]  
+    }  
+  ],  
+  "outputs": {  
+    "dcrId": {  
+      "type": "string",  
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName'))]"  
+    },  
+    "dcrAssociationId": {  
+      "type": "string",  
+      "value": "[extensionResourceId(parameters('vmResourceId'), 'Microsoft.Insights/dataCollectionRuleAssociations', parameters('dcrAssociationName'))]"  
+    },  
+    "resolvedVmResourceId": {  
+      "type": "string",  
+      "value": "[resourceId(parameters('vmResourceGroup'), 'Microsoft.Compute/virtualMachines', parameters('vmName'))]"  
+    }  
+  }  
+}  
