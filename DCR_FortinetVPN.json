@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],
-            "transformKql": "source | where SyslogMessage has 'logver=' | extend logver = extract('logver=([0-9]+)', 1, SyslogMessage), timestamp = extract('timestamp=([0-9]+)', 1, SyslogMessage), devName = extract('devname=(+)', 1, SyslogMessage)",
+            "transformKql": "source | where SyslogMessage has 'logver=' | extend logver = extract('logver=([0-9]+)', 1, SyslogMessage), timestamp = extract('timestamp=([0-9]+)', 1, SyslogMessage), devName = extract('devname=([*])', 1, SyslogMessage)",
             "outputStream": "Custom-fortiVPN_CL"
           }  
         ]  
