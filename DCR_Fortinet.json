@@ -91,7 +91,7 @@
               "laDestination"  
             ],  
             "transformKql": "source | where SyslogMessage has 'logver='",
-            "outputStream": "Custom-Forti_CL"
+            "outputStream": "Custom-forti_CL"
           }  
         ]  
       }  
