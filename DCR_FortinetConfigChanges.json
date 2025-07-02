@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where SyslogMessage has 'logid=\"0100044547\"'",
+            "transformKql": "source | where SyslogMessage contains 'logid=\"0100044547\"' or SyslogMessage constains 'logid=\"0100044545\"'",
             "outputStream": "Custom-fortiConfigSentinel_CL"
           },
           {
@@ -100,7 +100,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where SyslogMessage has 'subtype=\"system\"' | where SyslogMessage notcontains 'logid=\"0100044547\"'",
+            "transformKql": "source | where SyslogMessage has 'subtype=\"system\"' | where SyslogMessage notcontains 'logid=\"0100044547\"' or SyslogMessage notcontains 'logid=\"0100044545\"'",
             "outputStream": "Custom-fortiConfigInfo_CL"
           }  
         ]  
