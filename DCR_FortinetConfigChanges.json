@@ -100,7 +100,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where SyslogMessage has 'subtype=\"system\"' | where syslogMessage notcontains 'logid=\"0100044547\"'",
+            "transformKql": "source | where SyslogMessage has 'subtype=\"system\"' | where SyslogMessage notcontains 'logid=\"0100044547\"'",
             "outputStream": "Custom-fortiConfigInfo_CL"
           }  
         ]  
