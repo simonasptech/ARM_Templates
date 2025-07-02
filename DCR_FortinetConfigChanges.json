@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where SyslogMessage contains 'logid=\"0100044547\"' or SyslogMessage constains 'logid=\"0100044545\"'",
+            "transformKql": "source | where SyslogMessage contains 'logid=\"0100044547\"' or SyslogMessage contains 'logid=\"0100044545\"'",
             "outputStream": "Custom-fortiConfigSentinel_CL"
           },
           {
