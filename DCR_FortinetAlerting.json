@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where HostName == 'FAZ-Alerting'",
+            "transformKql": "source | where SyslogMessage has 'FAZ-Alerting'",
             "outputStream": "Custom-fortiAlerting_CL"
           } 
         ]  
