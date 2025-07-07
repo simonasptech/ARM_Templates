@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source",
+            "transformKql": "source | where ProcessName == 'FAZ-Alerting' | project TimeGenerated, Computer, Facility, SeverityLevel, ProcessName, ProcessID, HostIP, HostName, SyslogMessage, Subject = extract('subject=\"([^\"]+)\"', 1, SyslogMessage), Device = extract('device=\"([^\"]+)\"', 1, SyslogMessage), Severity = extract('severity=\"([^\"]+)\"', 1, SyslogMessage), FromSource = extract('from=\"([^\"]+)\"', 1, SyslogMessage), Trigger = extract('trigger=\"([^\"]+)\"', 1, SyslogMessage), Tag = extract('tag=\"([^\"]+)\"', 1, SyslogMessage), AlertId = extract('alertid=([0-9]+)', 1, SyslogMessage), LogData = extract('log=\"(.+)\"",
             "outputStream": "Custom-fortiAlerting_CL"
           } 
         ]  
