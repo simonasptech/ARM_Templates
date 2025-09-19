@@ -1,5 +1,5 @@
 {  
-  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",  
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/DeploymentTemplate.json#",  
   "contentVersion": "1.0.0.0",  
   "parameters": {  
     "location": {  
@@ -7,7 +7,7 @@
       "metadata": {  
         "description": "Location for all resources."  
       }  
-    },  
+    },
     "workspaceName": {  
       "type": "string",  
       "metadata": {  
@@ -90,7 +90,7 @@
             "destinations": [  
               "laDestination"  
             ],  
-            "transformKql": "source | where ProcessName == 'FAZ-Alerting'",
+            "transformKql": "Source | extend RawLog = EventOriginal | parse RawLog with * \"subject=\\\"\" Subject \"\\\"\" * | parse RawLog with * \"device=\\\"\" DeviceName \"\\\"\" * | parse RawLog with * \"severity=\\\"\" Severity \"\\\"\" * | parse RawLog with * \"trigger=\\\"\" Trigger \"\\\"\" * | parse RawLog with * \"tag=\\\"\" Tags \"\\\"\" * | parse RawLog with * \"alertid=\" AlertId:int * | parse RawLog with * \"log=\\\"\" InnerLog | parse kind=regex InnerLog with * \"logid=\\\\\\\"?(?<LogId>[0-9]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"type=\\\\\\\"?(?<EventType>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"subtype=\\\\\\\"?(?<EventSubType>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"eventtype=\\\\\\\"?(?<EventSubTypeDetail>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"devname=\\\\\\\"(?<DeviceNameDetail>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"vd=\\\\\\\"(?<VDOM>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"eventtime=(?<EventTime>[0-9]+)\" * | parse kind=regex InnerLog with * \"srcip=\\\\\\\"?(?<SrcIP>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"srcport=(?<SrcPort>[0-9]+)\" * | parse kind=regex InnerLog with * \"srccountry=\\\\\\\"?(?<SrcCountry>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"dstip=\\\\\\\"?(?<DstIP>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"dstport=(?<DstPort>[0-9]+)\" * | parse kind=regex InnerLog with * \"dstcountry=\\\\\\\"?(?<DstCountry>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"srcintf=\\\\\\\"(?<SrcInterface>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"dstintf=\\\\\\\"(?<DstInterface>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"user=\\\\\\\"(?<User>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"ui=\\\\\\\"(?<UI>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"app=\\\\\\\"(?<Application>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"appcat=\\\\\\\"(?<AppCategory>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"apprisk=\\\\\\\"(?<AppRisk>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"hostname=\\\\\\\"(?<Hostname>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"url=\\\\\\\"(?<URL>[^\\\\\\\"]*)\\\\\\\"\" * | parse kind=regex InnerLog with * \"sni=\\\\\\\"(?<SNI>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"scertcname=\\\\\\\"(?<CertificateCN>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"scertissuer=\\\\\\\"(?<CertificateIssuer>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"cfgpath=\\\\\\\"(?<ConfigPath>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"cfgobj=\\\\\\\"(?<ConfigObject>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"cfgattr=\\\\\\\"(?<ConfigAttr>[^\\\\\\\"]+)\\\\\\\"\" * | parse kind=regex InnerLog with * \"action=\\\\\\\"?(?<Action>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"status=\\\\\\\"?(?<Status>[^\\\\s\\\"]+)\\\\\\\"?\" * | parse kind=regex InnerLog with * \"msg=\\\\\\\"(?<Msg>[^\\\\\\\"]+)\\\\\\\"\" * | project TimeGenerated, Subject, DeviceName, Severity, Trigger, Tags, AlertId, LogId, EventType, EventSubType, EventSubTypeDetail, DeviceNameDetail, VDOM, EventTime, SrcIP, SrcPort, SrcCountry, DstIP, DstPort, DstCountry, SrcInterface, DstInterface, User, UI, Application, AppCategory, AppRisk, Hostname, URL, SNI, CertificateCN, CertificateIssuer, ConfigPath, ConfigObject, ConfigAttr, Action, Status, Msg, RawLog",
             "outputStream": "Custom-fortiAlerting_CL"
           } 
         ]  
